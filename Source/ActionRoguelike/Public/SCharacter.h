@@ -27,19 +27,38 @@ protected:
 	UCameraComponent* CameraComp;
 
 	UPROPERTY(EditAnywhere, Category = "Input settings")
-	FName HorizontalAxisName;
+	FName HorizontalAxisName = "Horizontal";
 
 	UPROPERTY(EditAnywhere, Category = "Input settings")
-	FName VerticalAxisName;
+	FName VerticalAxisName = "Vertical";
 
 	UPROPERTY(EditAnywhere, Category = "Input settings")
-	FName YawAxisName;
+	FName YawAxisName = "Turn";
+
+	UPROPERTY(EditAnywhere, Category = "Input settings")
+	FName PitchAxisName = "LookUp";
+
+	UPROPERTY(EditAnywhere, Category = "Input settings")
+	FName PrimaryAttackName = "Primary Attack";
+
+	UPROPERTY(EditAnywhere, Category = "Input settings")
+	FName JumpKeyName = "Jump";
+
+	UPROPERTY(EditAnywhere, Category = "Sockets")
+	FName EffectSocketName = "Muzzle_01";
+
+	UPROPERTY(EditAnywhere, Category = "Basic settings")
+	bool bUsePawnControlRotation = true;
+
+	UPROPERTY(EditAnywhere, Category = "Other classes")
+	TSubclassOf<AActor> ProjectileClass;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void MoveForward(float value);
 	void MoveRight(float value);
+	void PrimaryAttack();
 
 public:	
 	// Called every frame
