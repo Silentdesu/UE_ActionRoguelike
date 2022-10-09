@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class USInteractionComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -26,6 +27,9 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
 
+	UPROPERTY(VisibleAnywhere)
+	USInteractionComponent* InteractionComp;
+
 	UPROPERTY(EditAnywhere, Category = "Input settings")
 	FName HorizontalAxisName = "Horizontal";
 
@@ -39,7 +43,16 @@ protected:
 	FName PitchAxisName = "LookUp";
 
 	UPROPERTY(EditAnywhere, Category = "Input settings")
-	FName PrimaryAttackName = "Primary Attack";
+	FName PrimaryAttackName = "PrimaryAttack";
+
+	UPROPERTY(EditAnywhere, Category = "Input settings")
+	FName PrimaryBlackholeName = "PrimaryBlackhole";
+
+	UPROPERTY(EditAnywhere, Category = "Input settings")
+	FName PrimaryDashName = "PrimaryDash";
+
+	UPROPERTY(EditAnywhere, Category = "Input settings")
+	FName PrimaryInteractName = "PrimaryInteractName";
 
 	UPROPERTY(EditAnywhere, Category = "Input settings")
 	FName JumpKeyName = "Jump";
@@ -50,8 +63,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Basic settings")
 	bool bUsePawnControlRotation = true;
 
-	UPROPERTY(EditAnywhere, Category = "Other classes")
+	UPROPERTY(EditAnywhere, Category = "Line trace settings")
+	float LineTraceLength = 1000.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Projectiles")
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = "Projectiles")
+	TSubclassOf<AActor> DashProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = "Projectiles")
+	TSubclassOf<AActor> BlackholeProjectileClass;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -59,6 +81,12 @@ protected:
 	void MoveForward(float value);
 	void MoveRight(float value);
 	void PrimaryAttack();
+	void PrimaryInteract();
+	void PrimaryDash();
+	void PrimaryBlackhole();
+
+	bool IsLineTraceHit(FHitResult& outHitResult, FVector& outEndLocation);
+	void SpawnProjectile(TSubclassOf<AActor>& projectile, FVector& startLocation, const FVector& endLocation);
 
 public:	
 	// Called every frame

@@ -18,7 +18,7 @@ ASBarrel::ASBarrel()
 	RootComponent = StaticMeshComponent;
 
 	RadialForceComponent = CreateDefaultSubobject<URadialForceComponent>("RadialForce");
-	RadialForceComponent->SetupAttachment(RadialForceComponent);
+	RadialForceComponent->SetupAttachment(StaticMeshComponent);
 	
 	RadialForceComponent->SetAutoActivate(false);
 	RadialForceComponent->Radius = 750.0f;
@@ -28,9 +28,9 @@ ASBarrel::ASBarrel()
 }
 
 // Called when the game starts or when spawned
-void ASBarrel::BeginPlay()
+void ASBarrel::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 
 	StaticMeshComponent->OnComponentHit.AddDynamic(this, &ASBarrel::OnActorHit);
 }
