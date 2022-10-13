@@ -5,6 +5,8 @@
 #include "Components/SphereComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/AudioComponent.h"
 
 // Sets default values
 ASBaseProjectile::ASBaseProjectile()
@@ -19,10 +21,14 @@ ASBaseProjectile::ASBaseProjectile()
 	EffectComponent = CreateDefaultSubobject<UParticleSystemComponent>("EffectComponent");
 	EffectComponent->SetupAttachment(SphereComponent);
 
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	AudioComponent->SetupAttachment(SphereComponent);
+
 	MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComponent");
-	MovementComponent->InitialSpeed = 100.0f;
 	MovementComponent->bRotationFollowsVelocity = true;
 	MovementComponent->bInitialVelocityInLocalSpace = true;
+	MovementComponent->ProjectileGravityScale = 0.f;
+	MovementComponent->InitialSpeed = 8000.f;
 }
 
 void ASBaseProjectile::PostInitializeComponents()
@@ -39,5 +45,15 @@ void ASBaseProjectile::OnActorHit(UPrimitiveComponent* HitComponent, AActor* Oth
 
 void ASBaseProjectile::Explode_Implementation()
 {
+	if (!IsPendingKill())
+	{
+		if (ImpactVFX != nullptr)
+			UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
+		if (ImpactSFX != nullptr)
+			UGameplayStatics::SpawnSoundAtLocation(this, ImpactSFX, GetActorLocation());
+		if (CameraShakeBase != nullptr)
+			UGameplayStatics::PlayWorldCameraShake(this, CameraShakeBase, GetActorLocation(), CameraShakeInnerRadius, CameraShakeOutsideRadius, bCameraFalloffEffect);
 
+		Destroy();
+	}
 }

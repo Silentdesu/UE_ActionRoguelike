@@ -15,9 +15,6 @@ class ACTIONROGUELIKE_API ASDashProjectile : public ASBaseProjectile
 
 protected:
 
-	UPROPERTY(EditAnywhere, Category = "Basic settings")
-	UParticleSystem* ExplodeEmitter;
-
 	UPROPERTY(EditAnywhere, Category = "Time settings")
 	float TeleportDelay = .2f;
 

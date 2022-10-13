@@ -9,6 +9,8 @@
 class UCameraComponent;
 class USpringArmComponent;
 class USInteractionComponent;
+class USAttributeComponent;
+class UProjectileSystem;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -27,8 +29,11 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USInteractionComponent* InteractionComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USAttributeComponent* AttributeComp;
 
 	UPROPERTY(EditAnywhere, Category = "Input settings")
 	FName HorizontalAxisName = "Horizontal";
@@ -60,6 +65,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Sockets")
 	FName EffectSocketName = "Muzzle_01";
 
+	UPROPERTY(EditAnywhere, Category = "Material settings")
+	FName FlashMaterialName = "TimeToHit";
+
 	UPROPERTY(EditAnywhere, Category = "Basic settings")
 	bool bUsePawnControlRotation = true;
 
@@ -75,8 +83,16 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Projectiles")
 	TSubclassOf<AActor> BlackholeProjectileClass;
 
+	UPROPERTY(EditAnywhere, Category = "VFX")
+	UParticleSystem* ProjectileSpawnVFX;
+	
+protected:
+
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
 	void MoveForward(float value);
 	void MoveRight(float value);
@@ -89,10 +105,7 @@ protected:
 	void SpawnProjectile(TSubclassOf<AActor>& projectile, FVector& startLocation, const FVector& endLocation);
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };

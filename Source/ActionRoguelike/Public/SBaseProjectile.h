@@ -9,6 +9,8 @@
 class USphereComponent;
 class UProjectileMovementComponent;
 class UParticleSystemComponent;
+class UAudioComponent;
+class USoundBase;
 
 UCLASS(ABSTRACT)
 class ACTIONROGUELIKE_API ASBaseProjectile : public AActor
@@ -32,6 +34,27 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UParticleSystemComponent* EffectComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UAudioComponent* AudioComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Impact settings")
+	UParticleSystem* ImpactVFX;
+
+	UPROPERTY(EditAnywhere, Category = "Impact settings")
+	USoundBase* ImpactSFX;
+
+	UPROPERTY(EditAnywhere, Category = "Impact settings")
+	TSubclassOf<class UCameraShakeBase> CameraShakeBase;
+
+	UPROPERTY(EditAnywhere, Category = "Impact settings")
+	float CameraShakeInnerRadius;
+
+	UPROPERTY(EditAnywhere, Category = "Impact settings")
+	float CameraShakeOutsideRadius;
+
+	UPROPERTY(EditAnywhere, Category = "Impact settings")
+	bool bCameraFalloffEffect;
 
 protected:
 

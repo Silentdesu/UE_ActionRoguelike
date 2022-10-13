@@ -7,7 +7,9 @@
 #include "..\Public\SCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SInteractionComponent.h"
-#include "DrawDebugHelpers.h"
+#include "SAttributeComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -15,31 +17,25 @@ ASCharacter::ASCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>("SpringArmComp");
+	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->bUsePawnControlRotation = bUsePawnControlRotation;
 	SpringArmComp->SetupAttachment(RootComponent);
 
-	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
+	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	InteractionComp = CreateDefaultSubobject<USInteractionComponent>(TEXT("Interaction Comp"));
+	AttributeComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("Attribute Comp"));
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
 }
 
-// Called when the game starts or when spawned
-void ASCharacter::BeginPlay()
+void ASCharacter::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 
-}
-
-// Called every frame
-void ASCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
+	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 }
 
 // Called to bind functionality to input
@@ -82,7 +78,7 @@ void ASCharacter::MoveRight(float value)
 
 void ASCharacter::PrimaryAttack()
 {
-	if (!ensure(ProjectileClass))
+	if (ProjectileClass == nullptr)
 		return;
 
 	FVector socketLocation = GetMesh()->GetSocketLocation(EffectSocketName);
@@ -98,7 +94,7 @@ void ASCharacter::PrimaryAttack()
 
 void ASCharacter::PrimaryBlackhole()
 {
-	if (!ensure(BlackholeProjectileClass))
+	if (BlackholeProjectileClass == nullptr)
 		return;
 
 	FVector socketLocation = GetMesh()->GetSocketLocation(EffectSocketName);
@@ -114,7 +110,7 @@ void ASCharacter::PrimaryBlackhole()
 
 void ASCharacter::PrimaryDash()
 {
-	if (!ensure(DashProjectileClass))
+	if (DashProjectileClass == nullptr)
 		return;
 
 	FVector socketLocation = GetMesh()->GetSocketLocation(EffectSocketName);
@@ -157,6 +153,25 @@ void ASCharacter::SpawnProjectile(TSubclassOf<AActor>& projectile, FVector& star
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	SpawnParameters.Instigator = this;
 
+	if (ProjectileSpawnVFX != nullptr)
+		UGameplayStatics::SpawnEmitterAttached(ProjectileSpawnVFX, GetMesh(), EffectSocketName, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
+
 	GetWorld()->SpawnActor<AActor>(projectile, SpawnMatrix, SpawnParameters);
+}
+
+void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
+{
+
+	if (NewHealth <= 0.f && Delta < 0.f)
+	{
+		APlayerController* playerController = Cast<APlayerController>(GetController());
+
+		if (playerController != nullptr)
+			DisableInput(playerController);
+
+		return;
+	}
+
+	GetMesh()->SetScalarParameterValueOnMaterials(FlashMaterialName, GetWorld()->TimeSeconds);
 }
 

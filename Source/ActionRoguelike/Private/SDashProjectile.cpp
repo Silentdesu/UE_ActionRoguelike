@@ -3,6 +3,8 @@
 
 #include "SDashProjectile.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 void ASDashProjectile::BeginPlay()
 {
@@ -15,11 +17,14 @@ void ASDashProjectile::Explode_Implementation()
 {
 	GetWorldTimerManager().ClearTimer(TimerHandle);
 
-	UGameplayStatics::SpawnEmitterAtLocation(this, ExplodeEmitter, GetActorLocation(), GetActorRotation());
+	UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
+	
+	EffectComponent->DeactivateSystem();
+	MovementComponent->StopMovementImmediately();
+
 	SetActorEnableCollision(false);
 
 	FTimerHandle teleportDelayHandle;
-
 	GetWorldTimerManager().SetTimer(teleportDelayHandle, this, &ASDashProjectile::TeleportInstigator, TeleportDelay);
 }
 
