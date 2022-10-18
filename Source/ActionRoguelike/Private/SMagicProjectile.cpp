@@ -24,11 +24,11 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	if (OtherActor && OtherActor != GetInstigator())
 	{
-		USAttributeComponent* attributeComponnent = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
+		USAttributeComponent* attributeComponnent = USAttributeComponent::GetAttributes(OtherActor);
 
 		if (attributeComponnent)
 		{
-			attributeComponnent->ApplyHealthChange(-Damage);
+			attributeComponnent->ApplyHealthChange(GetInstigator(), -Damage);
 
 			if (ImpactVFX != nullptr)
 				UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());

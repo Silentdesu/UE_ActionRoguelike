@@ -6,6 +6,11 @@
 #include "GameFramework/Character.h"
 #include "SAICharacter.generated.h"
 
+class UPawnSensingComponent;
+class USAttributeComponent;
+class UUserWidget;
+class USBaseWorldUserWidget;
+
 UCLASS()
 class ACTIONROGUELIKE_API ASAICharacter : public ACharacter
 {
@@ -16,10 +21,36 @@ public:
 	ASAICharacter();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USAttributeComponent* AttributeComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPawnSensingComponent* PawnSensingComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard keys")
+	FName TargetKey;
+
+	UPROPERTY(VisibleAnywhere, Category = "Material parameter")
+	FName TimeToHitParameterName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> HealthWidget;
+
+protected:
+
+	virtual void PostInitializeComponents() override;
+
+	UFUNCTION()
+	void OnPawnSeeing(APawn* pawn);
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	void SetTargetActor(AActor* NewTarget);
+
+private:
+
+	UPROPERTY()
+	USBaseWorldUserWidget* ActiveHealthWidget;
 };

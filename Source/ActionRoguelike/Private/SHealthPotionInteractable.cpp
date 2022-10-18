@@ -3,13 +3,24 @@
 
 #include "SHealthPotionInteractable.h"
 #include "../Public/SAttributeComponent.h"
+#include "Components/StaticMeshComponent.h"
 
-void ASHealthPotionInteractable::OnInteract(APawn* InstigatorPawn)
+ASHealthPotionInteractable::ASHealthPotionInteractable()
 {
-	USAttributeComponent* attributeComponent = Cast<USAttributeComponent>(InstigatorPawn->GetComponentByClass(USAttributeComponent::StaticClass()));
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MeshComponent->SetupAttachment(RootComponent);
+}
 
-	if (attributeComponent != nullptr)
-		attributeComponent->ApplyHealthChange(HealAmount);
+void ASHealthPotionInteractable::Interact_Implementation(APawn* instigatorPawn)
+{
+	if (!instigatorPawn)
+		return;
 
-	Super::OnInteract(InstigatorPawn);
+	USAttributeComponent* attributeComponent = USAttributeComponent::GetAttributes(instigatorPawn);
+
+	if (attributeComponent && !attributeComponent->IsFullHealth())
+		if (attributeComponent->ApplyHealthChange(this, HealAmount))
+			HideAndCooldown();
+
 }

@@ -13,24 +13,59 @@ USAttributeComponent::USAttributeComponent()
 	Health = MaxHealth;
 }
 
+USAttributeComponent* USAttributeComponent::GetAttributes(AActor* fromActor)
+{
+	if (fromActor)
+	{
+		return Cast<USAttributeComponent>(fromActor->GetComponentByClass(USAttributeComponent::StaticClass()));
+	}
+
+	return nullptr;
+}
+
+bool USAttributeComponent::IsActorAlive(AActor* fromActor)
+{
+	if (fromActor)
+	{
+		USAttributeComponent* attributeComponent = GetAttributes(fromActor);
+
+		if (attributeComponent)
+		{
+			return attributeComponent->IsAlive();
+		}
+	}
+
+	return false;
+}
+
+bool USAttributeComponent::Kill(AActor* instigatorActor)
+{
+	return ApplyHealthChange(instigatorActor, -MaxHealth);
+}
+
 bool USAttributeComponent::IsAlive() const
 {
 	return Health > 0.f;
 }
 
-bool USAttributeComponent::IsHealthFull() const
+bool USAttributeComponent::IsFullHealth() const
 {
 	return (MaxHealth - Health) <= 0.f;
 }
 
-bool USAttributeComponent::ApplyHealthChange(float value)
+bool USAttributeComponent::ApplyHealthChange(AActor* instigatorActor, float delta)
 {
-	Health += value;
+	if (!GetOwner()->CanBeDamaged())
+	{
+		return false;
+	}
 
-	Health = FMath::Clamp(Health, 0.f, MaxHealth);
+	float oldHealth = Health;
+	Health = FMath::Clamp(Health + delta, 0.f, MaxHealth);
+	float actualDelta = Health - oldHealth;
 
-	OnHealthChanged.Broadcast(nullptr, this, Health, value);
+	OnHealthChanged.Broadcast(instigatorActor, this, Health, delta);
 
-	return true;
+	return actualDelta != 0;
 }
 

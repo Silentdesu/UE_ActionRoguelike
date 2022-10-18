@@ -3,35 +3,37 @@
 
 #include "SBaseInteractable.h"
 #include "SAttributeComponent.h"
+#include "Components/SphereComponent.h"
 
 ASBaseInteractable::ASBaseInteractable()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	RootComponent = MeshComponent;
+	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+	SphereComponent->SetCollisionProfileName("Interactable");
+	RootComponent = SphereComponent;
 }
 
 void ASBaseInteractable::Interact_Implementation(APawn* InstigatorPawn)
 {
-	USAttributeComponent* attributeComponent = Cast<USAttributeComponent>(InstigatorPawn->GetComponentByClass(USAttributeComponent::StaticClass()));
-
-	if (attributeComponent != nullptr && !attributeComponent->IsHealthFull())
-		OnInteract(InstigatorPawn);
+	//Create implementation
 }
 
-void ASBaseInteractable::OnInteract(APawn* InstigatorPawn)
+void ASBaseInteractable::Show()
 {
-	MeshComponent->SetVisibility(false);
-
-	GetWorldTimerManager().SetTimer(OnInteractDelayTime, this, &ASBaseInteractable::OnInteractTimeElapsed, VisiblityDelay);
+	SetInteractableActiveState(true);
 }
 
-void ASBaseInteractable::OnInteractTimeElapsed()
+void ASBaseInteractable::HideAndCooldown()
 {
-	GetWorldTimerManager().ClearTimer(OnInteractDelayTime);
+	SetInteractableActiveState(false);
 
-	MeshComponent->SetVisibility(true);;
+	GetWorldTimerManager().SetTimer(OnInteractDelayTimer, this, &ASBaseInteractable::Show, RespawnTime);
 }
 
+void ASBaseInteractable::SetInteractableActiveState(bool bActiveState)
+{
+	GetWorldTimerManager().ClearTimer(OnInteractDelayTimer);
+
+	SetActorEnableCollision(bActiveState);
+	SphereComponent->SetVisibility(bActiveState, true);
+}
 

@@ -31,6 +31,11 @@ ASCharacter::ASCharacter()
 	bUseControllerRotationYaw = false;
 }
 
+void ASCharacter::HealSelf(float amount /* = 100 */)
+{
+	AttributeComp->ApplyHealthChange(this, amount);
+}
+
 void ASCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();

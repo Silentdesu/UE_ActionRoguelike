@@ -21,6 +21,16 @@ public:
 	// Sets default values for this character's properties
 	ASCharacter();
 
+public:
+
+	UFUNCTION(Exec)
+	void HealSelf(float amount = 100);
+
+public:	
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 protected:
 	
 	UPROPERTY(VisibleAnywhere)
@@ -104,8 +114,4 @@ protected:
 	bool IsLineTraceHit(FHitResult& outHitResult, FVector& outEndLocation);
 	void SpawnProjectile(TSubclassOf<AActor>& projectile, FVector& startLocation, const FVector& endLocation);
 
-public:	
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };

@@ -7,7 +7,7 @@
 #include "SGameplayInterface.h"
 #include "SBaseInteractable.generated.h"
 
-class UStaticMeshComponent;
+class USphereComponent;
 
 UCLASS(ABSTRACT)
 class ACTIONROGUELIKE_API ASBaseInteractable : public AActor, public ISGameplayInterface
@@ -21,21 +21,22 @@ public:
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* MeshComponent;
+	USphereComponent* SphereComponent;
 
 protected:
 
 	UPROPERTY(EditAnywhere, Category = "Time settings")
-	float VisiblityDelay = 10.f;
+	float RespawnTime = 10.f;
 
-	FTimerHandle OnInteractDelayTime;
+	FTimerHandle OnInteractDelayTimer;
 
 protected:
 
-	virtual void OnInteract(APawn* InstigatorPawn);
-	virtual void OnInteractTimeElapsed();
+	void Show();
+	void HideAndCooldown();
+	void SetInteractableActiveState(bool bActiveState);
 
 public:
 
-	void Interact_Implementation(APawn* InstigatorPawn) override;
+	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
 };

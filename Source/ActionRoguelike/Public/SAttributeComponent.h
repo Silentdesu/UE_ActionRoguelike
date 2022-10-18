@@ -17,6 +17,31 @@ public:
 	// Sets default values for this actor's properties
 	USAttributeComponent();
 
+public:
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	static USAttributeComponent* GetAttributes(AActor* fromActor);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes", meta = (DisplayName = "IsAlive"))
+	static bool IsActorAlive(AActor* fromActor);
+
+public:	
+
+	UFUNCTION(BlueprintCallable)
+	bool Kill(AActor* instigatorActor);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsAlive() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsFullHealth() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	bool ApplyHealthChange(AActor* instigatorActor, float value);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHealthChanged OnHealthChanged;
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
@@ -25,17 +50,4 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	float Health;
 
-public:	
-
-	UFUNCTION(BlueprintCallable)
-	bool IsAlive() const;
-
-	UFUNCTION(BlueprintCallable)
-	bool IsHealthFull() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Attributes")
-	bool ApplyHealthChange(float value);
-
-	UPROPERTY(BlueprintAssignable)
-	FOnHealthChanged OnHealthChanged;
 };

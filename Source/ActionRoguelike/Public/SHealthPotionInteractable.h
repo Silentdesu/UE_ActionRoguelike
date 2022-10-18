@@ -6,6 +6,8 @@
 #include "SBaseInteractable.h"
 #include "SHealthPotionInteractable.generated.h"
 
+class UStaticMeshComponent;
+
 /**
  * 
  */
@@ -14,12 +16,19 @@ class ACTIONROGUELIKE_API ASHealthPotionInteractable : public ASBaseInteractable
 {
 	GENERATED_BODY()
 
+public:
+
+	ASHealthPotionInteractable();
+
 protected:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UStaticMeshComponent* MeshComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Basic settings")
 	float HealAmount = 50.f;
 
-protected:
+public:
 
-	virtual void OnInteract(APawn* InstigatorPawn) override;
+	void Interact_Implementation(APawn* instigatorPawn) override;
 };
