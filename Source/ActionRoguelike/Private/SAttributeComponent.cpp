@@ -53,6 +53,16 @@ bool USAttributeComponent::IsFullHealth() const
 	return (MaxHealth - Health) <= 0.f;
 }
 
+float USAttributeComponent::GetCurrentHealth() const
+{
+	return Health;
+}
+
+float USAttributeComponent::GetMaxHealth() const
+{
+	return MaxHealth;
+}
+
 bool USAttributeComponent::ApplyHealthChange(AActor* instigatorActor, float delta)
 {
 	if (!GetOwner()->CanBeDamaged())
