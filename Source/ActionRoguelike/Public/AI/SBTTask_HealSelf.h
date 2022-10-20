@@ -23,12 +23,4 @@ public:
 public:
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
-private:
-
-	UPROPERTY()
-	ASHealthPotionInteractable* HealthPotionInteractable;
-
-	UPROPERTY(VisibleAnywhere, Category = "AI")
-	FBlackboardKeySelector MoveToLocationKey;
 };

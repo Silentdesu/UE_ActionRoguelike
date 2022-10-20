@@ -32,6 +32,28 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
+
+	virtual void PostInitializeComponents() override;
+	
+	virtual FVector GetPawnViewLocation() const override;
+
+protected:
+
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	void MoveForward(float value);
+	void MoveRight(float value);
+	void PrimaryAttack();
+	void PrimaryInteract();
+	void PrimaryDash();
+	void PrimaryBlackhole();
+
+	bool IsLineTraceHit(FHitResult& outHitResult, FVector& outEndLocation);
+	void SpawnProjectile(TSubclassOf<AActor>& projectile, FVector& startLocation, const FVector& endLocation);
+
+protected:
 	
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
@@ -96,22 +118,5 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "VFX")
 	UParticleSystem* ProjectileSpawnVFX;
 	
-protected:
-
-	// Called when the game starts or when spawned
-	virtual void PostInitializeComponents() override;
-
-	UFUNCTION()
-	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
-
-	void MoveForward(float value);
-	void MoveRight(float value);
-	void PrimaryAttack();
-	void PrimaryInteract();
-	void PrimaryDash();
-	void PrimaryBlackhole();
-
-	bool IsLineTraceHit(FHitResult& outHitResult, FVector& outEndLocation);
-	void SpawnProjectile(TSubclassOf<AActor>& projectile, FVector& startLocation, const FVector& endLocation);
 
 };

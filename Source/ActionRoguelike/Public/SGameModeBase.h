@@ -28,10 +28,24 @@ public:
 	UFUNCTION(Exec)
 	void KillAllAI();
 
+	UFUNCTION(BlueprintCallable)
+	void OnActorKilled(AActor* Victim, AActor* Killer);
+
 public:
 
 	virtual void StartPlay() override;
-	
+
+protected:
+
+	UFUNCTION()
+	void SpawnBotTimerElapsed();
+
+	UFUNCTION()
+	void RespawnPlayerElapsed(AController* Controller);
+
+	UFUNCTION()
+	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
@@ -49,14 +63,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "AI")
 	float SpawnTimeInterval;
 
+	UPROPERTY(EditAnywhere, Category = "Timer settings", meta = (ClampMin = "1.0", ClampMax = "10.0"))
+	float RespawnDelay;
+
 	FTimerHandle TimeHandler;
 
 
-protected:
-
-	UFUNCTION()
-	void SpawnBotTimerElapsed();
-
-	UFUNCTION()
-	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 };

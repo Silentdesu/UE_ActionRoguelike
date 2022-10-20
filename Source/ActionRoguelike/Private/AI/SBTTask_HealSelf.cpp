@@ -7,9 +7,7 @@
 
 USBTTask_HealSelf::USBTTask_HealSelf()
 {
-	NodeName = TEXT("Find Health Potion");
-
-	MoveToLocationKey.SelectedKeyName = "HealthPotionLocation";
+	NodeName = TEXT("Heal Self");
 }
 
 EBTNodeResult::Type USBTTask_HealSelf::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

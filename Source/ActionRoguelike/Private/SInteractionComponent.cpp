@@ -5,6 +5,8 @@
 #include "SGameplayInterface.h"
 #include "DrawDebugHelpers.h"
 
+static TAutoConsoleVariable<bool> CVarDrawDebug(TEXT("su.DrawDebug"), false, TEXT("Draw Debug for Interaction Component."), ECVF_Cheat);
+
 // Sets default values for this component's properties
 USInteractionComponent::USInteractionComponent()
 {
@@ -14,6 +16,8 @@ USInteractionComponent::USInteractionComponent()
 
 void USInteractionComponent::PrimaryInteract()
 {
+	bool bDrawDebug = CVarDrawDebug.GetValueOnGameThread();
+
 	FCollisionObjectQueryParams collisionObjectQueryParams;
 	collisionObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 
@@ -39,6 +43,9 @@ void USInteractionComponent::PrimaryInteract()
 
 	for (FHitResult hitResult : hitResults)
 	{
+		if (bDrawDebug)
+			DrawDebugSphere(GetWorld(), hitResult.ImpactPoint, SweepSphereRadius, 16, color, false, 2.f);
+
 		AActor* actor = hitResult.GetActor();
 
 		if (actor == nullptr)
@@ -49,11 +56,11 @@ void USInteractionComponent::PrimaryInteract()
 			APawn* pawn = Cast<APawn>(owner);
 
 			ISGameplayInterface::Execute_Interact(actor, pawn);
+			break;
 		}
-		
-		DrawDebugSphere(GetWorld(), hitResult.ImpactPoint, SweepSphereRadius, 16, color, false, 2.f);
 	}
 
-	DrawDebugLine(GetWorld(), startLocation, endLocation, color, false, 2.f, 0, 2.f);
+	if (bDrawDebug)
+		DrawDebugLine(GetWorld(), startLocation, endLocation, color, false, 2.f, 0, 2.f);
 }
 
