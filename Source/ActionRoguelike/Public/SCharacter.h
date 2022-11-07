@@ -10,6 +10,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class USInteractionComponent;
 class USAttributeComponent;
+class USActionComponent;
 class UProjectileSystem;
 
 UCLASS()
@@ -31,41 +32,44 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-protected:
-
-	virtual void PostInitializeComponents() override;
-	
 	virtual FVector GetPawnViewLocation() const override;
 
 protected:
 
+	virtual void PostInitializeComponents() override;
+
+protected:
 
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
+protected:
+
 	void MoveForward(float value);
 	void MoveRight(float value);
+	void SprintStart();
+	void SprintStop();
 	void PrimaryAttack();
 	void PrimaryInteract();
 	void PrimaryDash();
 	void PrimaryBlackhole();
 
-	bool IsLineTraceHit(FHitResult& outHitResult, FVector& outEndLocation);
-	void SpawnProjectile(TSubclassOf<AActor>& projectile, FVector& startLocation, const FVector& endLocation);
-
 protected:
 	
 	UPROPERTY(VisibleAnywhere)
-	USpringArmComponent* SpringArmComp;
+	USpringArmComponent* SpringArmComponent;
 	
 	UPROPERTY(VisibleAnywhere)
-	UCameraComponent* CameraComp;
+	UCameraComponent* CameraComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
-	USInteractionComponent* InteractionComp;
+	USInteractionComponent* InteractionComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USAttributeComponent* AttributeComp;
+	USAttributeComponent* AttributeComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USActionComponent* ActionComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Input settings")
 	FName HorizontalAxisName = "Horizontal";
@@ -94,29 +98,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input settings")
 	FName JumpKeyName = "Jump";
 
-	UPROPERTY(EditAnywhere, Category = "Sockets")
-	FName EffectSocketName = "Muzzle_01";
+	UPROPERTY(EditAnywhere, Category = "Input settings")
+	FName SprintKeyName = "Sprint";
 
 	UPROPERTY(EditAnywhere, Category = "Material settings")
 	FName FlashMaterialName = "TimeToHit";
 
 	UPROPERTY(EditAnywhere, Category = "Basic settings")
 	bool bUsePawnControlRotation = true;
-
-	UPROPERTY(EditAnywhere, Category = "Line trace settings")
-	float LineTraceLength = 1000.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Projectiles")
-	TSubclassOf<AActor> ProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "Projectiles")
-	TSubclassOf<AActor> DashProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "Projectiles")
-	TSubclassOf<AActor> BlackholeProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "VFX")
-	UParticleSystem* ProjectileSpawnVFX;
-	
-
 };

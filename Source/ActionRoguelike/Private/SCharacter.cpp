@@ -10,6 +10,7 @@
 #include "SAttributeComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "SActionComponent.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -17,15 +18,16 @@ ASCharacter::ASCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
-	SpringArmComp->bUsePawnControlRotation = bUsePawnControlRotation;
-	SpringArmComp->SetupAttachment(RootComponent);
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm Component"));
+	SpringArmComponent->bUsePawnControlRotation = bUsePawnControlRotation;
+	SpringArmComponent->SetupAttachment(RootComponent);
 
-	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
-	CameraComp->SetupAttachment(SpringArmComp);
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
+	CameraComponent->SetupAttachment(SpringArmComponent);
 
-	InteractionComp = CreateDefaultSubobject<USInteractionComponent>(TEXT("Interaction Comp"));
-	AttributeComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("Attribute Comp"));
+	InteractionComponent = CreateDefaultSubobject<USInteractionComponent>(TEXT("Interaction Component"));
+	AttributeComponent = CreateDefaultSubobject<USAttributeComponent>(TEXT("Attribute Component"));
+	ActionComponent = CreateDefaultSubobject<USActionComponent>(TEXT("Action Component"));
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
@@ -33,19 +35,19 @@ ASCharacter::ASCharacter()
 
 void ASCharacter::HealSelf(float amount /* = 100 */)
 {
-	AttributeComp->ApplyHealthChange(this, amount);
+	AttributeComponent->ApplyHealthChange(this, amount);
 }
 
 void ASCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+	AttributeComponent->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const
 {
-	return CameraComp->GetComponentLocation();
+	return CameraComponent->GetComponentLocation();
 }
 
 // Called to bind functionality to input
@@ -64,6 +66,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction(PrimaryDashName, IE_Pressed, this, &ASCharacter::PrimaryDash);
 	PlayerInputComponent->BindAction(PrimaryInteractName, IE_Pressed, this, &ASCharacter::PrimaryInteract);
 	PlayerInputComponent->BindAction(JumpKeyName, IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction(SprintKeyName, IE_Pressed, this, &ASCharacter::SprintStart);
+	PlayerInputComponent->BindAction(SprintKeyName, IE_Released, this, &ASCharacter::SprintStop);
 }
 
 void ASCharacter::MoveForward(float value)
@@ -86,87 +90,37 @@ void ASCharacter::MoveRight(float value)
 	AddMovementInput(rightVector, value);
 }
 
+void ASCharacter::SprintStart()
+{
+	ActionComponent->StartActionByName(this, "Sprint");
+}
+
+void ASCharacter::SprintStop()
+{
+	ActionComponent->StopActionByName(this, "Sprint");
+}
+
 void ASCharacter::PrimaryAttack()
 {
-	if (ProjectileClass == nullptr)
-		return;
-
-	FVector socketLocation = GetMesh()->GetSocketLocation(EffectSocketName);
-
-	FHitResult hitResult;
-	FVector endLocation;
-
-	if (IsLineTraceHit(hitResult, endLocation))
-		endLocation = hitResult.ImpactPoint;
-
-	SpawnProjectile(ProjectileClass, socketLocation, endLocation);
+	ActionComponent->StartActionByName(this, "ProjectileAttack");
 }
 
 void ASCharacter::PrimaryBlackhole()
 {
-	if (BlackholeProjectileClass == nullptr)
-		return;
-
-	FVector socketLocation = GetMesh()->GetSocketLocation(EffectSocketName);
-	
-	FHitResult hitResult;
-	FVector endLocation;
-
-	if (IsLineTraceHit(hitResult, endLocation))
-		endLocation = hitResult.ImpactPoint;
-
-	SpawnProjectile(BlackholeProjectileClass, socketLocation, endLocation);
+	ActionComponent->StartActionByName(this, "Blackhole");
 }
 
 void ASCharacter::PrimaryDash()
 {
-	if (DashProjectileClass == nullptr)
-		return;
-
-	FVector socketLocation = GetMesh()->GetSocketLocation(EffectSocketName);
-	
-	FHitResult hitResult;
-	FVector endLocation;
-
-	if (IsLineTraceHit(hitResult, endLocation))
-		endLocation = hitResult.ImpactPoint;
-
-	SpawnProjectile(DashProjectileClass, socketLocation, endLocation);
+	ActionComponent->StartActionByName(this, "Dash");
 }
 
 void ASCharacter::PrimaryInteract()
 {
-	if (InteractionComp == nullptr)
+	if (InteractionComponent == nullptr)
 		return;
 
-	InteractionComp->PrimaryInteract();
-}
-
-bool ASCharacter::IsLineTraceHit(FHitResult& outHitResult, FVector& outEndLocation)
-{
-	FCollisionObjectQueryParams collisionQueryParams;
-	collisionQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-	collisionQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
-
-	FVector startLocation = CameraComp->GetComponentLocation();
-	outEndLocation = startLocation + (CameraComp->GetComponentRotation().Vector() * LineTraceLength);
-
-	return GetWorld()->LineTraceSingleByObjectType(outHitResult, startLocation, outEndLocation, collisionQueryParams);
-}
-
-void ASCharacter::SpawnProjectile(TSubclassOf<AActor>& projectile, FVector& startLocation, const FVector& endLocation)
-{
-	FRotator projectileRotation = (endLocation - startLocation).Rotation();
-	FTransform SpawnMatrix = FTransform(projectileRotation, startLocation);
-	
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	SpawnParameters.Instigator = this;
-
-	if (ProjectileSpawnVFX != nullptr)
-		UGameplayStatics::SpawnEmitterAttached(ProjectileSpawnVFX, GetMesh(), EffectSocketName, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
-
-	GetWorld()->SpawnActor<AActor>(projectile, SpawnMatrix, SpawnParameters);
+	InteractionComponent->PrimaryInteract();
 }
 
 void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
