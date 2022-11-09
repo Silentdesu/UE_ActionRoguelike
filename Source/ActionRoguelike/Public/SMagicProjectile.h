@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "SBaseProjectile.h"
+#include "GameplayTagContainer.h"
 #include "SMagicProjectile.generated.h"
 
 UCLASS()
@@ -22,6 +23,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float Damage = 20.f;
+
+	UPROPERTY(EditAnywhere)
+	FGameplayTag ParryTag;
 
 protected:
 
