@@ -10,12 +10,14 @@
 #include "EngineUtils.h"
 #include "SCharacter.h"
 #include "TimerManager.h"
+#include "SCreditSystem.h"
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("su.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
 
 ASGameModeBase::ASGameModeBase()
 {
 	SpawnTimeInterval = 2.0f;
+	CreditsPerKill = 25;
 }
 
 void ASGameModeBase::KillAllAI()
@@ -56,6 +58,16 @@ void ASGameModeBase::OnActorKilled(AActor* Victim, AActor* Killer)
 		GetWorldTimerManager().SetTimer(TimerHandle_RespawnDelay, Delegate, RespawnDelay, false);
 	}
 
+	APawn* KillerPawn = Cast<APawn>(Killer);
+
+	if (KillerPawn)
+	{
+		if (ASCreditSystem* CreditSystem = KillerPawn->GetPlayerState<ASCreditSystem>())
+		{
+			CreditSystem->AddCredits(CreditsPerKill);
+		}
+	}
+
 	UE_LOG(LogTemp, Log, TEXT("OnActorKiled -> Victim: %s, Killer: %s"), *GetNameSafe(Victim), *GetNameSafe(Killer));
 }
 
@@ -64,6 +76,16 @@ void ASGameModeBase::StartPlay()
 	Super::StartPlay();
 
 	GetWorldTimerManager().SetTimer(TimeHandler, this, &ASGameModeBase::SpawnBotTimerElapsed, SpawnTimeInterval, true);
+
+	if (PowerupClasses.Num() > 0)
+	{
+		UEnvQueryInstanceBlueprintWrapper* PowerupSpawnQueryInstance = UEnvQueryManager::RunEQSQuery(this, PowerupSpawnQuery, this, EEnvQueryRunMode::AllMatching, nullptr);
+
+		if (PowerupSpawnQueryInstance)
+		{
+			PowerupSpawnQueryInstance->GetOnQueryFinishedEvent().AddDynamic(this, &ASGameModeBase::OnPowerupSpawnQueryCompleted);
+		}
+	}
 }
 
 void ASGameModeBase::SpawnBotTimerElapsed()
@@ -118,5 +140,52 @@ void ASGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryIn
 	if (locations.IsValidIndex(0))
 	{
 		GetWorld()->SpawnActor<AActor>(MinionClass, locations[0], FRotator::ZeroRotator);
+	}
+}
+
+void ASGameModeBase::OnPowerupSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus)
+{
+	if (QueryStatus != EEnvQueryStatus::Success)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Spawn bot EQS Query Failed!"));
+		return;
+	}
+
+	TArray<FVector> Locations = QueryInstance->GetResultsAsLocations();
+
+	TArray<FVector> UsedLocations;
+
+	int32 SpawnCounter = 0;
+	while (SpawnCounter < DesiredPowerupCount && Locations.Num() > 0)
+	{
+		int32 RandomLocationIndex = FMath::RandRange(0, Locations.Num() - 1);
+
+		FVector PickedLocation = Locations[RandomLocationIndex];
+		Locations.RemoveAt(RandomLocationIndex);
+
+		bool bValidLocation = true;
+		for (FVector OtherLocation : UsedLocations)
+		{
+			float DistanceTo = (PickedLocation - OtherLocation).Size();
+
+			if (DistanceTo < RequiredPowerupDistance)
+			{
+				bValidLocation = false;
+				break;
+			}
+		}
+
+		if (!bValidLocation)
+		{
+			continue;
+		}
+
+		int32 RandomClassIndex = FMath::RandRange(0, PowerupClasses.Num() - 1);
+		TSubclassOf<AActor> RandomPowerupClass = PowerupClasses[RandomClassIndex];
+
+		GetWorld()->SpawnActor<AActor>(RandomPowerupClass, PickedLocation, FRotator::ZeroRotator);
+
+		UsedLocations.Add(PickedLocation);
+		SpawnCounter++;
 	}
 }

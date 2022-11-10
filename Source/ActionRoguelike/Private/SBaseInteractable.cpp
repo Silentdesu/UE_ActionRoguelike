@@ -4,12 +4,17 @@
 #include "SBaseInteractable.h"
 #include "SAttributeComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 ASBaseInteractable::ASBaseInteractable()
 {
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	SphereComponent->SetCollisionProfileName("Interactable");
 	RootComponent = SphereComponent;
+
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MeshComponent->SetupAttachment(RootComponent);
 }
 
 void ASBaseInteractable::Interact_Implementation(APawn* InstigatorPawn)

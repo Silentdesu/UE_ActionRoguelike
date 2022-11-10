@@ -8,6 +8,7 @@
 #include "SBaseInteractable.generated.h"
 
 class USphereComponent;
+class UStaticMeshComponent;
 
 UCLASS(ABSTRACT)
 class ACTIONROGUELIKE_API ASBaseInteractable : public AActor, public ISGameplayInterface
@@ -23,10 +24,16 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USphereComponent* SphereComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* MeshComponent;
+
 protected:
 
 	UPROPERTY(EditAnywhere, Category = "Time settings")
 	float RespawnTime = 10.f;
+
+	UPROPERTY(EditAnywhere, Category = "Credits")
+	int32 CreditsAmount;
 
 	FTimerHandle OnInteractDelayTimer;
 

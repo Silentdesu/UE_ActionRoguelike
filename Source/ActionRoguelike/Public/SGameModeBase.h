@@ -12,7 +12,7 @@ class UEnvQueryInstanceBlueprintWrapper;
 class UCurveFloat;
 
 /**
- * 
+ *
  */
 UCLASS()
 class ACTIONROGUELIKE_API ASGameModeBase : public AGameModeBase
@@ -46,6 +46,9 @@ protected:
 	UFUNCTION()
 	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 
+	UFUNCTION()
+	void OnPowerupSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
@@ -56,6 +59,18 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	TSubclassOf<AActor> MinionClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Powerups")
+	UEnvQuery* PowerupSpawnQuery;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Powerups")
+	TArray<TSubclassOf<AActor>> PowerupClasses;	
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Powerups")
+	float RequiredPowerupDistance;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Powerups")
+	int32 DesiredPowerupCount;
 
 	UPROPERTY(EditAnywhere, Category = "AI")
 	int BotLimit;
@@ -68,5 +83,9 @@ protected:
 
 	FTimerHandle TimeHandler;
 
+protected:
+
+	UPROPERTY(EditAnywhere, Category = "Credits")
+	int32 CreditsPerKill;
 
 };

@@ -4,12 +4,11 @@
 #include "SHealthPotionInteractable.h"
 #include "../Public/SAttributeComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "SCreditSystem.h"
 
 ASHealthPotionInteractable::ASHealthPotionInteractable()
 {
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	MeshComponent->SetupAttachment(RootComponent);
+	CreditsAmount = 50;
 }
 
 void ASHealthPotionInteractable::Interact_Implementation(APawn* instigatorPawn)
@@ -20,7 +19,8 @@ void ASHealthPotionInteractable::Interact_Implementation(APawn* instigatorPawn)
 	USAttributeComponent* attributeComponent = USAttributeComponent::GetAttributes(instigatorPawn);
 
 	if (attributeComponent && !attributeComponent->IsFullHealth())
-		if (attributeComponent->ApplyHealthChange(this, HealAmount))
-			HideAndCooldown();
+		if (ASCreditSystem* CreditSystem = instigatorPawn->GetPlayerState<ASCreditSystem>())
+			if (CreditSystem->RemoveCredits(CreditsAmount) && attributeComponent->ApplyHealthChange(this, HealAmount))
+				HideAndCooldown();
 
 }
