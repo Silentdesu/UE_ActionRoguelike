@@ -15,7 +15,7 @@ void USActionComponent::BeginPlay()
 
 	for (TSubclassOf<USAction> ActionClass : DefaultActions)
 	{
-		AddAction(ActionClass);
+		AddAction(GetOwner(), ActionClass);
 	}
 }
 
@@ -27,7 +27,7 @@ void USActionComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, DebugMessage);
 }
 
-void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
+void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass)
 {
 	if (!ActionClass)
 		return;
@@ -37,7 +37,20 @@ void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
 	if (Action)
 	{
 		Actions.Add(Action);
+
+		if (Action->bAutoStart && Action->CanStart(Instigator))
+		{
+			Action->Start(Instigator);
+		}
 	}
+}
+
+void USActionComponent::RemoveAction(USAction* ActionClass)
+{
+	if (!ActionClass && ActionClass->IsRunning())
+		return;
+
+	Actions.Remove(ActionClass);
 }
 
 bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)

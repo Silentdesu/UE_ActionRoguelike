@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "SInteractionComponent.generated.h"
 
+class USBaseWorldUserWidget;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ACTIONROGUELIKE_API USInteractionComponent : public UActorComponent
@@ -18,14 +19,33 @@ public:
 
 public:
 
-	UPROPERTY(EditAnywhere)
+	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+public:
+
+	UPROPERTY(EditAnywhere, Category = "Trace")
 	float TraceLineLength;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Trace")
 	float SweepSphereRadius;
+
+	UPROPERTY(EditAnywhere, Category = "Trace")
+	TEnumAsByte<ECollisionChannel> CollisionChannel;
 
 public:
 
 	void PrimaryInteract();
+	void FindBestInteractable();
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<USBaseWorldUserWidget> DefaultWidgetClass;
+
+	UPROPERTY()
+	USBaseWorldUserWidget* DefaultWidgetInstance;
+
+	UPROPERTY()
+	AActor* FocusedActor;
 		
 };

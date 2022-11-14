@@ -8,6 +8,8 @@
 #include "GameplayTagContainer.h"
 #include "SMagicProjectile.generated.h"
 
+class USActionEffect;
+
 UCLASS()
 class ACTIONROGUELIKE_API ASMagicProjectile : public ASBaseProjectile
 {
@@ -26,6 +28,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	FGameplayTag ParryTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effect")
+	TSubclassOf<USActionEffect> ActionEffect;
 
 protected:
 

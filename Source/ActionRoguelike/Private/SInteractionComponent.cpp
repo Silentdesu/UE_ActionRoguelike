@@ -4,63 +4,105 @@
 #include "SInteractionComponent.h"
 #include "SGameplayInterface.h"
 #include "DrawDebugHelpers.h"
+#include "SBaseWorldUserWidget.h"
+
+//TODO: Refactor
 
 static TAutoConsoleVariable<bool> CVarDrawDebug(TEXT("su.DrawDebug"), false, TEXT("Draw Debug for Interaction Component."), ECVF_Cheat);
 
 // Sets default values for this component's properties
 USInteractionComponent::USInteractionComponent()
 {
+	PrimaryComponentTick.bCanEverTick = true;
+
 	TraceLineLength = 1000.f;
 	SweepSphereRadius = 30.f;
+	CollisionChannel = ECC_WorldDynamic;
 }
 
-void USInteractionComponent::PrimaryInteract()
+void USInteractionComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	FindBestInteractable();
+}
+
+void USInteractionComponent::FindBestInteractable()
 {
 	bool bDrawDebug = CVarDrawDebug.GetValueOnGameThread();
 
-	FCollisionObjectQueryParams collisionObjectQueryParams;
-	collisionObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	FCollisionObjectQueryParams CollisionObjectQueryParams;
+	CollisionObjectQueryParams.AddObjectTypesToQuery(CollisionChannel);
 
 	AActor* owner = GetOwner();
 
-	FVector startLocation;
-	FRotator outRotator;
-	owner->GetActorEyesViewPoint(startLocation, outRotator);
+	FVector StartLocation;
+	FRotator OutRotator;
+	owner->GetActorEyesViewPoint(StartLocation, OutRotator);
 
-	FVector endLocation = startLocation + (outRotator.Vector() * TraceLineLength);
+	FVector EndLocation = StartLocation + (OutRotator.Vector() * TraceLineLength);
 
-	//FHitResult hitResult;
-	//bHit = GetWorld()->LineTraceSingleByObjectType(hitResult, startLocation, endLocation, collisionObjectQueryParams);
-
-	TArray<FHitResult> hitResults;
+	TArray<FHitResult> HitResults;
 	bool bHit;
-	FCollisionShape shape;
-	shape.SetSphere(SweepSphereRadius);
-	bHit = GetWorld()->SweepMultiByObjectType(hitResults, startLocation, endLocation, FQuat::Identity,
-		collisionObjectQueryParams, shape);
+	FCollisionShape Shape;
+	Shape.SetSphere(SweepSphereRadius);
+	bHit = GetWorld()->SweepMultiByObjectType(HitResults, StartLocation, EndLocation, FQuat::Identity,
+		CollisionObjectQueryParams, Shape);
 
-	FColor color = bHit ? FColor::Green : FColor::Red;
+	FColor Color = bHit ? FColor::Green : FColor::Red;
 
-	for (FHitResult hitResult : hitResults)
+	FocusedActor = nullptr;
+
+	for (FHitResult HitResult : HitResults)
 	{
 		if (bDrawDebug)
-			DrawDebugSphere(GetWorld(), hitResult.ImpactPoint, SweepSphereRadius, 16, color, false, 2.f);
+			DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, SweepSphereRadius, 16, Color, false, 2.f);
 
-		AActor* actor = hitResult.GetActor();
+		AActor* HitActor = HitResult.GetActor();
 
-		if (actor == nullptr)
+		if (HitActor == nullptr)
 			return;
 
-		if (actor->Implements<USGameplayInterface>())
+		if (HitActor->Implements<USGameplayInterface>())
 		{
-			APawn* pawn = Cast<APawn>(owner);
+			FocusedActor = HitActor;
 
-			ISGameplayInterface::Execute_Interact(actor, pawn);
 			break;
 		}
 	}
 
+	if (FocusedActor)
+	{
+		if (DefaultWidgetInstance == nullptr && DefaultWidgetClass)
+			DefaultWidgetInstance = CreateWidget<USBaseWorldUserWidget>(GetWorld(), DefaultWidgetClass);
+
+		if (DefaultWidgetInstance)
+		{
+			DefaultWidgetInstance->AttachedActor = FocusedActor;
+
+			if (!DefaultWidgetInstance->IsInViewport())
+				DefaultWidgetInstance->AddToViewport();
+		}
+	}
+	else
+	{
+		if (DefaultWidgetInstance)
+			DefaultWidgetInstance->RemoveFromParent();
+	}
+
 	if (bDrawDebug)
-		DrawDebugLine(GetWorld(), startLocation, endLocation, color, false, 2.f, 0, 2.f);
+		DrawDebugLine(GetWorld(), StartLocation, EndLocation, Color, false, 2.f, 0, 2.f);
 }
 
+void USInteractionComponent::PrimaryInteract()
+{
+	if (FocusedActor == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, "No Focus Actor to interact.");
+		return;
+	}
+
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+
+	ISGameplayInterface::Execute_Interact(FocusedActor, OwnerPawn);
+}
