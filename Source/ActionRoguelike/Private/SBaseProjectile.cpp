@@ -26,6 +26,8 @@ ASBaseProjectile::ASBaseProjectile()
 	MovementComponent->bInitialVelocityInLocalSpace = true;
 	MovementComponent->ProjectileGravityScale = 0.f;
 	MovementComponent->InitialSpeed = 8000.f;
+
+	SetReplicates(true);
 }
 
 void ASBaseProjectile::PostInitializeComponents()

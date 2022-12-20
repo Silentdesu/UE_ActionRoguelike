@@ -126,7 +126,7 @@ void ASCharacter::PrimaryInteract()
 void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
 {
 
-	if (NewHealth <= 0.f && Delta < 0.f)
+	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
 		APlayerController* playerController = Cast<APlayerController>(GetController());
 
@@ -136,6 +136,12 @@ void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent*
 		return;
 	}
 
-	GetMesh()->SetScalarParameterValueOnMaterials(FlashMaterialName, GetWorld()->TimeSeconds);
+	if (Delta < 0.0f)
+	{
+		GetMesh()->SetScalarParameterValueOnMaterials(FlashMaterialName, GetWorld()->TimeSeconds);
+		float RageDelta = FMath::Abs(Delta);
+
+		AttributeComponent->ApplyRage(InstigatorActor, RageDelta);
+	}
 }
 

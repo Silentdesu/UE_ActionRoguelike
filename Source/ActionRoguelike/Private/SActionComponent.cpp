@@ -7,6 +7,8 @@
 USActionComponent::USActionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	SetIsReplicatedByDefault(true);
 }
 
 void USActionComponent::BeginPlay()
@@ -67,6 +69,11 @@ bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 				continue;
 			}
 
+			if (!GetOwner()->HasAuthority())
+			{
+				ServerStartAction(Instigator, ActionName);
+			}
+
 			Action->Start(Instigator);
 
 			return true;
@@ -92,4 +99,9 @@ bool USActionComponent::StopActionByName(AActor* Instigator, FName ActionName)
 	}
 
 	return false;
+}
+
+void USActionComponent::ServerStartAction_Implementation(AActor* Instigator, FName ActionName)
+{
+	StartActionByName(Instigator, ActionName);
 }

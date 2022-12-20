@@ -17,6 +17,15 @@ class ACTIONROGUELIKE_API ASItemChest : public AActor, public ISGameplayInterfac
 public:	
 	ASItemChest();
 
+public:
+
+	void Interact_Implementation(APawn* InstigatorPawn) override;
+
+protected:
+
+	UFUNCTION()
+	void OnRep_LidOpened();
+
 protected:
 
 	UPROPERTY(VisibleAnywhere)
@@ -28,7 +37,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Basic settings")
 	float TargetPitch;
 
-public:
-
-	void Interact_Implementation(APawn* InstigatorPawn) override;
+	UPROPERTY(ReplicatedUsing="OnRep_LidOpened", BlueprintReadOnly)
+	bool bLidOpened;
 };

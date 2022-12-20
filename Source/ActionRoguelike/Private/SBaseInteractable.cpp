@@ -15,6 +15,8 @@ ASBaseInteractable::ASBaseInteractable()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	MeshComponent->SetupAttachment(RootComponent);
+
+	SetReplicates(true);
 }
 
 void ASBaseInteractable::Interact_Implementation(APawn* InstigatorPawn)
