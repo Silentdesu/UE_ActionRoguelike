@@ -24,13 +24,16 @@ void USAction_ProjectileAttack::Start_Implementation(AActor* Instigator)
 
 		if (ProjectileSpawnVFX != nullptr)
 			UGameplayStatics::SpawnEmitterAttached(ProjectileSpawnVFX, Character->GetMesh(), HandSocketName, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
-	
-		FTimerHandle TimerHandleAttackDelay;
-		FTimerDelegate TimerDelegate;
 
-		TimerDelegate.BindUFunction(this, "AttackDelayElapsed", Character);
+		if (Character->HasAuthority())
+		{
+			FTimerHandle TimerHandleAttackDelay;
+			FTimerDelegate TimerDelegate;
 
-		GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackDelay, TimerDelegate, AttackAnimationDelay, false);
+			TimerDelegate.BindUFunction(this, "AttackDelayElapsed", Character);
+
+			GetWorld()->GetTimerManager().SetTimer(TimerHandleAttackDelay, TimerDelegate, AttackAnimationDelay, false);
+		}
 	}
 }
 
@@ -75,7 +78,7 @@ void USAction_ProjectileAttack::SpawnProjectile(ASCharacter* InstigatorCharacter
 {
 	FRotator projectileRotation = (endLocation - startLocation).Rotation();
 	FTransform SpawnMatrix = FTransform(projectileRotation, startLocation);
-	
+
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	SpawnParameters.Instigator = InstigatorCharacter;

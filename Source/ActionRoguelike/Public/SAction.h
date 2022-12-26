@@ -10,8 +10,23 @@
 class USActionComponent;
 class UWorld;
 
+USTRUCT()
+struct FActionRepData
+{
+
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY()
+	bool bIsRunning;
+	
+	UPROPERTY()
+	AActor* Instigator;
+};
+
 /**
- * 
+ *
  */
 UCLASS(Blueprintable)
 class ACTIONROGUELIKE_API USAction : public UObject
@@ -57,7 +72,7 @@ protected:
 	USActionComponent* GetOwningComponent() const;
 
 	UFUNCTION()
-	void OnRep_IsRunning();
+	void OnRep_RepData();
 
 protected:
 
@@ -67,8 +82,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer BlockedTags;
 
-	UPROPERTY(ReplicatedUsing = "OnRep_IsRunning")
-	bool bIsRunning;
+	UPROPERTY(ReplicatedUsing = "OnRep_RepData")
+	FActionRepData RepData;
 
 	UPROPERTY(Replicated)
 	USActionComponent* ActionComp;

@@ -23,26 +23,26 @@ bool USAction::CanStart_Implementation(AActor* Instigator)
 
 void USAction::Start_Implementation(AActor* Instigator)
 {
-	//UE_LOG(LogTemp, Log, TEXT("Running: %s"), *GetNameSafe(this));
-	LogOnScreen(this, FString::Printf(TEXT("Started: %s"), *ActionName.ToString()), FColor::Green);
+	UE_LOG(LogTemp, Log, TEXT("Running: %s"), *GetNameSafe(this));
+	//LogOnScreen(this, FString::Printf(TEXT("Started: %s"), *ActionName.ToString()), FColor::Green);
 
 	USActionComponent* ActionComponent = GetOwningComponent();
 	ActionComponent->ActiveGameplayTags.AppendTags(GrantTags);
 
-	bIsRunning = true;
+	RepData.bIsRunning = true;
+	RepData.Instigator = Instigator;
 }
 
 void USAction::Stop_Implementation(AActor* Instigator)
 {
-	//UE_LOG(LogTemp, Log, TEXT("Stopped: %s"), *GetNameSafe(this));
-	LogOnScreen(this, FString::Printf(TEXT("Stoped: %s"), *ActionName.ToString()), FColor::White);
-
-	ensureAlways(bIsRunning);
+	UE_LOG(LogTemp, Log, TEXT("Stopped: %s"), *GetNameSafe(this));
+	//LogOnScreen(this, FString::Printf(TEXT("Stoped: %s"), *ActionName.ToString()), FColor::White);
 
 	USActionComponent* ActionComponent = GetOwningComponent();
 	ActionComponent->ActiveGameplayTags.RemoveTags(GrantTags);
 
-	bIsRunning = false;
+	RepData.bIsRunning = false;
+	RepData.Instigator = Instigator;
 }
 
 UWorld* USAction::GetWorld() const
@@ -59,27 +59,27 @@ USActionComponent* USAction::GetOwningComponent() const
 	return ActionComp;
 }
 
-void USAction::OnRep_IsRunning()
+void USAction::OnRep_RepData()
 {
-	if (bIsRunning)
+	if (RepData.bIsRunning)
 	{
-		Start(nullptr);
+		Start(RepData.Instigator);
 	}
 	else
 	{
-		Stop(nullptr);
+		Stop(RepData.Instigator);
 	}
 }
 
 bool USAction::IsRunning() const
 {
-	return bIsRunning;
+	return RepData.bIsRunning;
 }
 
 void USAction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(USAction, bIsRunning);
+	DOREPLIFETIME(USAction, RepData);
 	DOREPLIFETIME(USAction, ActionComp);
 }
