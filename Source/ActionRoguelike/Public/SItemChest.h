@@ -19,6 +19,7 @@ public:
 
 public:
 
+	void OnActorLoaded_Implementation() override;
 	void Interact_Implementation(APawn* InstigatorPawn) override;
 
 protected:
@@ -37,6 +38,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Basic settings")
 	float TargetPitch;
 
-	UPROPERTY(ReplicatedUsing="OnRep_LidOpened", BlueprintReadOnly)
+	UPROPERTY(ReplicatedUsing="OnRep_LidOpened", BlueprintReadOnly, SaveGame)
 	bool bLidOpened;
 };

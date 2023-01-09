@@ -10,6 +10,7 @@
 class UEnvQuery;
 class UEnvQueryInstanceBlueprintWrapper;
 class UCurveFloat;
+class USSaveGame;
 
 /**
  *
@@ -25,11 +26,20 @@ public:
 
 public:
 
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
+public:
+
 	UFUNCTION(Exec)
 	void KillAllAI();
 
 	UFUNCTION(BlueprintCallable)
 	void OnActorKilled(AActor* Victim, AActor* Killer);
+
+	UFUNCTION(BlueprintCallable, Category = "SaveGame")
+	void WriteSaveGame();
+	void LoadSaveGame();
 
 public:
 
@@ -50,6 +60,12 @@ protected:
 	void OnPowerupSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 
 protected:
+	
+	UPROPERTY(EditDefaultsOnly, Category = "SaveGame")
+	FString SlotName;
+
+	UPROPERTY()
+	USSaveGame* CurrentSaveGame;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	UEnvQuery* SpawnBotQuery;
@@ -81,11 +97,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Timer settings", meta = (ClampMin = "1.0", ClampMax = "10.0"))
 	float RespawnDelay;
 
-	FTimerHandle TimeHandler;
-
-protected:
-
 	UPROPERTY(EditAnywhere, Category = "Credits")
 	int32 CreditsPerKill;
 
+	FTimerHandle TimeHandler;
 };

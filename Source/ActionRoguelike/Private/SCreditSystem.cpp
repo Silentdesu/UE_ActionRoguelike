@@ -2,6 +2,7 @@
 
 
 #include "SCreditSystem.h"
+#include "SSaveGame.h"
 
 void ASCreditSystem::AddCredits(int32 Delta)
 {
@@ -32,6 +33,22 @@ bool ASCreditSystem::RemoveCredits(int32 Delta)
 	OnCreditsChanged.Broadcast(this, Credits, -Delta);
 
 	return true;
+}
+
+void ASCreditSystem::SavePlayerState_Implementation(USSaveGame* SaveObject)
+{
+	if (SaveObject)
+	{
+		SaveObject->Credits = Credits;
+	}
+}
+
+void ASCreditSystem::LoadPlayerState_Implementation(USSaveGame* SaveObject)
+{
+	if (SaveObject)
+	{
+		Credits = SaveObject->Credits;
+	}
 }
 
 int32 ASCreditSystem::GetCredits() const
