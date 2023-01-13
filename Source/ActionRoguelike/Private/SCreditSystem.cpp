@@ -3,6 +3,7 @@
 
 #include "SCreditSystem.h"
 #include "SSaveGame.h"
+#include "Net/UnrealNetwork.h"
 
 void ASCreditSystem::AddCredits(int32 Delta)
 {
@@ -47,11 +48,24 @@ void ASCreditSystem::LoadPlayerState_Implementation(USSaveGame* SaveObject)
 {
 	if (SaveObject)
 	{
-		Credits = SaveObject->Credits;
+		//Credits = SaveObject->Credits;
+		AddCredits(SaveObject->Credits);
 	}
+}
+
+void ASCreditSystem::OnRep_Credits(int32 OldCredits)
+{
+	OnCreditsChanged.Broadcast(this, Credits, Credits - OldCredits);
 }
 
 int32 ASCreditSystem::GetCredits() const
 {
 	return Credits;
+}
+
+void ASCreditSystem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASCreditSystem, Credits);
 }

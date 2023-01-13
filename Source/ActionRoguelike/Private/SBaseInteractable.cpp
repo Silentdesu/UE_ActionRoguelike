@@ -5,6 +5,7 @@
 #include "SAttributeComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 
 ASBaseInteractable::ASBaseInteractable()
 {
@@ -24,6 +25,7 @@ void ASBaseInteractable::Interact_Implementation(APawn* InstigatorPawn)
 	//Create implementation
 }
 
+
 void ASBaseInteractable::Show()
 {
 	SetInteractableActiveState(true);
@@ -36,11 +38,25 @@ void ASBaseInteractable::HideAndCooldown()
 	GetWorldTimerManager().SetTimer(OnInteractDelayTimer, this, &ASBaseInteractable::Show, RespawnTime);
 }
 
-void ASBaseInteractable::SetInteractableActiveState(bool bActiveState)
+void ASBaseInteractable::SetInteractableActiveState(bool bNewIsActive)
+{
+	bIsActive = bNewIsActive;
+
+	OnRep_IsActive();
+}
+
+void ASBaseInteractable::OnRep_IsActive()
 {
 	GetWorldTimerManager().ClearTimer(OnInteractDelayTimer);
 
-	SetActorEnableCollision(bActiveState);
-	SphereComponent->SetVisibility(bActiveState, true);
+	SetActorEnableCollision(bIsActive);
+	SphereComponent->SetVisibility(bIsActive, true);
+}
+
+void ASBaseInteractable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASBaseInteractable, bIsActive);
 }
 

@@ -42,6 +42,11 @@ public:
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, Category = "Credits")
+	UFUNCTION()
+	void OnRep_Credits(int32 OldCredits);
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = "OnRep_Credits", Category = "Credits")
 	int32 Credits;
 };

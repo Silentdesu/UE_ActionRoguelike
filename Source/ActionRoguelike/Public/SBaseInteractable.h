@@ -21,13 +21,19 @@ public:
 
 protected:
 
+	UFUNCTION()
+	void OnRep_IsActive();
+
+protected:
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USphereComponent* SphereComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* MeshComponent;
 
-protected:
+	UPROPERTY(ReplicatedUsing = "OnRep_IsActive")
+	bool bIsActive;
 
 	UPROPERTY(EditAnywhere, Category = "Time settings")
 	float RespawnTime = 10.f;
