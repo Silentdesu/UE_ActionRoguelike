@@ -8,6 +8,9 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPawnChanged, APawn*, NewPawn);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStateChanged, APlayerState*, NewPlayerState);
+
+class UUserWidget;
+
 /**
  * 
  */
@@ -26,9 +29,19 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BlueprintBeginPlayingState();
 
+	UFUNCTION(BlueprintCallable)
+	void TogglePauseMenu();
+
 	void OnRep_PlayerState() override;
+	void SetupInputComponent() override;
 
 protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> PauseMenuClass;
+
+	UPROPERTY()
+	UUserWidget* PauseMenuInstance;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPawnChanged OnPawnChanged;
