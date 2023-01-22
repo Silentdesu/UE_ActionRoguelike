@@ -3,11 +3,13 @@
 
 #include "SActionEffect.h"
 #include "SActionComponent.h"
+#include "GameFramework/GameStateBase.h"
 
 USActionEffect::USActionEffect()
 {
 	bAutoStart = true;
 }
+
 
 void USActionEffect::Start_Implementation(AActor* Instigator)
 {
@@ -52,3 +54,17 @@ void USActionEffect::ExecutePeriodEffect_Implementation(AActor* Instigator)
 {
 
 }
+
+float USActionEffect::GetTimeRemaining() const
+{
+	AGameStateBase* GameState = GetWorld()->GetGameState<AGameStateBase>();
+
+	if (GameState)
+	{
+		float EndTime = TimeStarted + Duration;
+		return EndTime - GameState->GetServerWorldTimeSeconds();
+	}
+
+	return Duration;
+}
+

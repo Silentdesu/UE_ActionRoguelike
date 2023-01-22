@@ -76,6 +76,9 @@ protected:
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	UTexture2D* Icon;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer GrantTags;
 
@@ -87,4 +90,7 @@ protected:
 
 	UPROPERTY(Replicated)
 	USActionComponent* ActionComp;
+
+	UPROPERTY(Replicated)
+	float TimeStarted;
 };
