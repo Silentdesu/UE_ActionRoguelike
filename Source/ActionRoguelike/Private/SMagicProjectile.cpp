@@ -13,7 +13,7 @@
 
 ASMagicProjectile::ASMagicProjectile()
 {
-
+	InitialLifeSpan = 10.0f;
 }
 
 void ASMagicProjectile::PostInitializeComponents()

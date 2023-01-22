@@ -6,6 +6,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "SCreditSystem.h"
 
+#define LOCTEXT_NAMESPACE "InteractableActors"
+
 ASHealthPotionInteractable::ASHealthPotionInteractable()
 {
 	CreditsAmount = 50;
@@ -24,3 +26,17 @@ void ASHealthPotionInteractable::Interact_Implementation(APawn* instigatorPawn)
 				HideAndCooldown();
 
 }
+
+FText ASHealthPotionInteractable::GetInteractText_Implementation(APawn* InstigatorPawn)
+{
+	USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(InstigatorPawn);
+
+	if (AttributeComponent && AttributeComponent->IsFullHealth())
+	{
+		return LOCTEXT("HealthPotion_FullHealthWarning", "Already at full health.");
+	}
+
+	return FText::Format(LOCTEXT("HealthPotion_InteractableMessage", "Cost {0} credits. Restores health to maximum."), CreditsAmount);
+}
+
+#undef LOCTEXT_NAMESPACE

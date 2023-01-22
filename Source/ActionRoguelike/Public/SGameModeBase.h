@@ -5,12 +5,45 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
+#include "Engine/DataTable.h"
 #include "SGameModeBase.generated.h"
 
 class UEnvQuery;
 class UEnvQueryInstanceBlueprintWrapper;
 class UCurveFloat;
 class USSaveGame;
+class UDataTable;
+class USMonsterData;
+
+USTRUCT(BlueprintType)
+struct FMonsterInfoRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+
+	FMonsterInfoRow()
+	{
+		Weight = 1.0f;
+		SpawnCost = 5.0f;
+		KillReward = 20.0f;
+	}
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FPrimaryAssetId MonsterId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Weight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float SpawnCost;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float KillReward;
+
+};
 
 /**
  *
@@ -59,6 +92,8 @@ protected:
 	UFUNCTION()
 	void OnPowerupSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 
+	void OnMonsterLoaded(FPrimaryAssetId LoadedId, FVector SpawnLocation);
+
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "SaveGame")
@@ -67,14 +102,17 @@ protected:
 	UPROPERTY()
 	USSaveGame* CurrentSaveGame;
 
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	UDataTable* MonsterTable;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	UEnvQuery* SpawnBotQuery;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	UCurveFloat* DifficultyCurve;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
-	TSubclassOf<AActor> MinionClass;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+	//TSubclassOf<AActor> MinionClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Powerups")
 	UEnvQuery* PowerupSpawnQuery;

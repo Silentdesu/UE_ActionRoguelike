@@ -28,4 +28,5 @@ protected:
 public:
 
 	void Interact_Implementation(APawn* instigatorPawn) override;
+	FText GetInteractText_Implementation(APawn* InstigatorPawn) override;
 };

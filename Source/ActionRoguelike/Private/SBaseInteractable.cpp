@@ -31,6 +31,11 @@ void ASBaseInteractable::Show()
 	SetInteractableActiveState(true);
 }
 
+FText ASBaseInteractable::GetInteractText(APawn* InstigatorPawn)
+{
+	return FText::GetEmpty();
+}
+
 void ASBaseInteractable::HideAndCooldown()
 {
 	SetInteractableActiveState(false);
